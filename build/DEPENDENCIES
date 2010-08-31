@@ -1,0 +1,16 @@
+  NEEDED      libwebkit-1.0.so.2
+  NEEDED      libgtk-x11-2.0.so.0
+  NEEDED      libsoup-2.4.so.1
+  NEEDED      libgdk-x11-2.0.so.0
+  NEEDED      libatk-1.0.so.0
+  NEEDED      libpangoft2-1.0.so.0
+  NEEDED      libgdk_pixbuf-2.0.so.0
+  NEEDED      libpangocairo-1.0.so.0
+  NEEDED      libcairo.so.2
+  NEEDED      libpango-1.0.so.0
+  NEEDED      libfreetype.so.6
+  NEEDED      libfontconfig.so.1
+  NEEDED      libgio-2.0.so.0
+  NEEDED      libgobject-2.0.so.0
+  NEEDED      libgmodule-2.0.so.0
+  NEEDED      libglib-2.0.so.0

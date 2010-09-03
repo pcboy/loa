@@ -40,7 +40,7 @@ static const gchar code[] =
 "\
     (function () { \
          function randStr(num) { \
-             var chars = 'arstdhneioupyfqw'; \a
+             var chars = 'arstdhneioupyfqw'; \
              var str = ''; \
              for (var i = num; i; i>>=4) { \
                  str += chars[i&0xf]; \

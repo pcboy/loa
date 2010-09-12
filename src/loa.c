@@ -174,6 +174,11 @@ static void loa_handleOpen(loa_t *slf)
     gtk_widget_grab_focus(GTK_WIDGET(slf->stbarentry));
 }
 
+static void loa_handleStop(loa_t *slf)
+{
+    webkit_web_view_stop_loading(slf->webview);
+}
+
 static void loa_loadFinishedCb(WebKitWebView *view, WebKitWebFrame *frame,
         gpointer data)
 {
@@ -208,6 +213,10 @@ static gint loa_keyPressCb(GtkWidget *widget,
         if (slf->mode == CMD_MODE) {
             switch (kevent->keyval) {
                 /* TODO: Put all that shit in a config file. */
+                case 's':
+                    g_message("Stop page");
+                    loa_handleStop(slf);
+                    break;
                 case 'i':
                     g_message("Switch to insert");
                     loa_switchMode(slf, INSERT_MODE);
@@ -217,7 +226,7 @@ static gint loa_keyPressCb(GtkWidget *widget,
                     loa_switchMode(slf, URL_MODE);
                     loa_handleUrl(slf);
                     break;
-                case 's':
+                case 'e':
                     g_message("Switch to entry");
                     loa_switchMode(slf, ENTRY_MODE);
                     loa_handleEntry(slf);

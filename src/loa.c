@@ -21,6 +21,7 @@
 
 #include "loa.h"
 
+
 static const gchar clickUrl[] =
 "\
     (function () { \
@@ -54,7 +55,6 @@ static const gchar code[] =
          style=color:red>\"+strand+\"</b>\"; \
      } \
      })()";
-
 
 static inline void loa_switchMode(loa_t *slf, mode_t m)
 {
@@ -101,6 +101,15 @@ static void loa_putWebkit(loa_t *slf)
     gtk_box_pack_start(slf->mainvbox, scrollwin, true, true, 0);
 }
 
+static gint loa_goUri(loa_t *slf, const gchar *txt)
+{
+    if (strlen(txt)) {
+        webkit_web_view_load_uri(slf->webview, txt);
+        gtk_entry_set_text(slf->stbaruri, txt);
+    }
+    return 0;
+}
+
 static gint loa_stbarActivateCb(GtkEntry *entry, gpointer data)
 {
     loa_t *slf = (loa_t*)data;
@@ -110,8 +119,7 @@ static gint loa_stbarActivateCb(GtkEntry *entry, gpointer data)
     gtk_widget_grab_focus(GTK_WIDGET(slf->webview));
     switch (slf->mode) {
         case OPEN_MODE:
-            if (strlen(txt))
-                webkit_web_view_load_uri(slf->webview, txt);
+            loa_goUri(slf, txt);
             break;
         case URL_MODE:
             {
@@ -132,7 +140,9 @@ static void loa_putStatusBar(loa_t *slf)
     GtkHBox *box = GTK_HBOX(gtk_hbox_new(false, 0));
     slf->stbarlbl = GTK_LABEL(gtk_label_new("loa"));
     slf->stbarentry = GTK_ENTRY(gtk_entry_new());
+    slf->stbaruri = GTK_ENTRY(gtk_entry_new());
 
+    gtk_editable_set_editable(GTK_EDITABLE(slf->stbaruri), false);
     gtk_entry_set_has_frame(slf->stbarentry, false);
     g_signal_connect(G_OBJECT(slf->stbarentry),
             "activate", G_CALLBACK(loa_stbarActivateCb), slf);
@@ -140,6 +150,8 @@ static void loa_putStatusBar(loa_t *slf)
             GTK_WIDGET(slf->stbarlbl), false, true, 0);
     gtk_box_pack_start(GTK_BOX(box),
             GTK_WIDGET(slf->stbarentry), false, true, 0);
+    gtk_box_pack_start(GTK_BOX(box),
+            GTK_WIDGET(slf->stbaruri), true, true, 0);
     gtk_box_pack_start(GTK_BOX(slf->mainvbox),
             GTK_WIDGET(box), false, true, 0);
 }
@@ -165,8 +177,9 @@ static void loa_handleOpen(loa_t *slf)
 static void loa_loadFinishedCb(WebKitWebView *view, WebKitWebFrame *frame,
         gpointer data)
 {
+    loa_t *loa = (loa_t*)data;
     (void)frame;
-    (void)data;
+    gtk_entry_set_text(loa->stbaruri, webkit_web_view_get_uri(view));
     webkit_web_view_execute_script(view, code);
 }
 
@@ -264,7 +277,7 @@ loa_t *loa_init(int argc, char **argv)
             "destroy", G_CALLBACK (loa_destroyCb), NULL); 
 
     gtk_widget_show_all(GTK_WIDGET(loa->mainwin));
-    webkit_web_view_load_uri(loa->webview, argc > 1 ? argv[1] : "http://google.com");
+    loa_goUri(loa, argc > 1 ? argv[1] : "http://google.com");
     return loa;
 }
 

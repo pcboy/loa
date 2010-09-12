@@ -20,6 +20,7 @@ typedef struct loa_s {
     WebKitWebView *webview;
     GtkLabel *stbarlbl;
     GtkEntry *stbarentry;
+    GtkEntry *stbaruri;
     GtkBox *mainvbox;
     GtkWindow *mainwin;
 } loa_t;

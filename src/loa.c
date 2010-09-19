@@ -96,6 +96,8 @@ static void loa_putWebkit(loa_t *slf)
     GtkWidget *scrollwin = gtk_scrolled_window_new(NULL, NULL);
     gtk_scrolled_window_set_policy (GTK_SCROLLED_WINDOW(scrollwin),
             GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
+    gtk_scrolled_window_set_placement(GTK_SCROLLED_WINDOW(scrollwin),
+            GTK_CORNER_TOP_RIGHT);
     slf->webview = WEBKIT_WEB_VIEW(webkit_web_view_new());
     gtk_container_add(GTK_CONTAINER(scrollwin), GTK_WIDGET(slf->webview));
     gtk_box_pack_start(slf->mainvbox, scrollwin, true, true, 0);

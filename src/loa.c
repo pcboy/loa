@@ -168,6 +168,7 @@ static void loa_handleUrl(loa_t *slf)
 {
     slf->modal = true;
     gtk_widget_grab_focus(GTK_WIDGET(slf->stbarentry));
+    webkit_web_view_execute_script(slf->webview, code);
 }
 
 static void loa_handleOpen(loa_t *slf)
@@ -187,7 +188,6 @@ static void loa_loadFinishedCb(WebKitWebView *view, WebKitWebFrame *frame,
     loa_t *loa = (loa_t*)data;
     (void)frame;
     gtk_entry_set_text(loa->stbaruri, webkit_web_view_get_uri(view));
-    webkit_web_view_execute_script(view, code);
 }
 
 static gint loa_loadProgressCb(WebKitWebView *webview,

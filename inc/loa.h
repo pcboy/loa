@@ -16,6 +16,7 @@ typedef struct loa_s {
     void (*init)(void);
     /**/
     int modal;
+    bool shortcuts; /* true when shortcuts appears */
     mode_t mode;
     WebKitWebView *webview;
     GtkLabel *stbarlbl;

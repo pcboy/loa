@@ -18,6 +18,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <gdk/gdkkeysyms.h>
 
 #include "loa.h"
 
@@ -248,10 +249,13 @@ static gint loa_keyPressCb(GtkWidget *widget,
                 case 'n': /* Next in colemak */
                     webkit_web_view_go_forward(slf->webview);
                     break;
+                case GDK_Up: /* Up/down arrows */
+                case GDK_Down:
+                    return 0;
             }
             return -1;
         }
-        if (kevent->keyval == 65307) { /* esc */
+        if (kevent->keyval == GDK_Escape) {
             g_message("Switch to cmd");
             loa_switchMode(slf, CMD_MODE);
         }

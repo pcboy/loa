@@ -168,7 +168,10 @@ static void loa_handleUrl(loa_t *slf)
 {
     slf->modal = true;
     gtk_widget_grab_focus(GTK_WIDGET(slf->stbarentry));
-    webkit_web_view_execute_script(slf->webview, code);
+    if (!slf->shortcuts) {
+        webkit_web_view_execute_script(slf->webview, code);
+        slf->shortcuts = true;
+    }
 }
 
 static void loa_handleOpen(loa_t *slf)
@@ -188,6 +191,7 @@ static void loa_loadFinishedCb(WebKitWebView *view, WebKitWebFrame *frame,
     loa_t *loa = (loa_t*)data;
     (void)frame;
     gtk_entry_set_text(loa->stbaruri, webkit_web_view_get_uri(view));
+    loa->shortcuts = false;
 }
 
 static gint loa_loadProgressCb(WebKitWebView *webview,
@@ -208,7 +212,7 @@ static gint loa_keyPressCb(GtkWidget *widget,
     loa_t *slf = (loa_t*)data;
 
     (void)widget;
-    g_message("%d, %c;", kevent->keyval, kevent->keyval);
+    /* g_message("%d, %c;", kevent->keyval, kevent->keyval); */
     gtk_widget_grab_focus(slf->modal ? GTK_WIDGET(slf->stbarentry)
             : GTK_WIDGET(slf->webview));
     if (kevent->type == GDK_KEY_PRESS)  {
@@ -273,6 +277,7 @@ loa_t *loa_init(int argc, char **argv)
 {
     loa_t *loa = calloc(1, sizeof(loa_t));
 
+    loa->shortcuts = false;
     loa->mode = CMD_MODE;
     loa_createMainWindow(loa);
     loa_putWebkit(loa);

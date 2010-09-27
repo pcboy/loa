@@ -260,6 +260,7 @@ static gint loa_keyPressCb(GtkWidget *widget,
             loa_switchMode(slf, CMD_MODE);
         }
         switch (slf->mode) {
+            case URL_MODE:
             case OPEN_MODE:
                 return -1;
             default:

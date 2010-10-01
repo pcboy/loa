@@ -249,8 +249,7 @@ static gint loa_keyPressCb(GtkWidget *widget,
                 case 'n': /* Next in colemak */
                     webkit_web_view_go_forward(slf->webview);
                     break;
-                case GDK_Up: /* Up/down arrows */
-                case GDK_Down:
+                case GDK_Left...GDK_Down: /* arrows */
                     return 0;
             }
             return -1;

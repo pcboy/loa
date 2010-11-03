@@ -216,7 +216,7 @@ pid_t loa_openNewWin(loa_t *slf, const char *uri)
     switch (pid) {
         case 0:
             setsid();
-            execl(slf->argv[0], slf->argv[0], uri, NULL);
+            execlp(slf->argv[0], slf->argv[0], uri, NULL);
             fprintf(stderr, "Can't open new loa instance\n");
             exit(EXIT_FAILURE);
             break;

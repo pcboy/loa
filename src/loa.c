@@ -18,6 +18,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <unistd.h>
+
 #include <gdk/gdkkeysyms.h>
 
 #include "loa.h"
@@ -207,6 +209,43 @@ static gint loa_loadProgressCb(WebKitWebView *webview,
     return 0;
 }
 
+pid_t loa_openNewWin(loa_t *slf, const char *uri)
+{
+    pid_t pid = fork();
+
+    switch (pid) {
+        case 0:
+            setsid();
+            execl(slf->argv[0], slf->argv[0], uri, NULL);
+            fprintf(stderr, "Can't open new loa instance\n");
+            exit(EXIT_FAILURE);
+            break;
+        case -1:
+            fprintf(stderr, "Can't fork\n");
+            perror("fork");
+            break;
+    }
+    return pid;
+}
+
+gboolean loa_navPolicyDecisionReqCb(WebKitWebView *webview,
+        WebKitWebFrame *frame, WebKitNetworkRequest *req,
+        WebKitWebNavigationAction *navaction,
+        WebKitWebPolicyDecision *policy, gpointer data)
+{
+    loa_t *slf = (loa_t*)data;
+
+    (void)webview, (void)frame;
+
+    if (webkit_web_navigation_action_get_button(navaction) == 2) {
+        /* middle click on uri */
+        loa_openNewWin(slf, webkit_network_request_get_uri(req));
+        return true;
+    }
+    webkit_web_policy_decision_use(policy);
+    return true;
+}
+
 static gint loa_keyPressCb(GtkWidget *widget,
         GdkEventKey *kevent, gpointer data)
 {
@@ -281,6 +320,8 @@ loa_t *loa_init(int argc, char **argv)
 {
     loa_t *loa = calloc(1, sizeof(loa_t));
 
+    loa->argc = argc;
+    loa->argv = argv;
     loa->shortcuts = false;
     loa->mode = CMD_MODE;
     loa_createMainWindow(loa);
@@ -293,6 +334,9 @@ loa_t *loa_init(int argc, char **argv)
             "load-progress-changed", G_CALLBACK(loa_loadProgressCb), loa);
     g_signal_connect(G_OBJECT(loa->webview),
             "load-finished", G_CALLBACK(loa_loadFinishedCb), loa);
+    g_signal_connect(G_OBJECT(loa->webview),
+            "navigation-policy-decision-requested",
+            G_CALLBACK(loa_navPolicyDecisionReqCb), loa);
     g_signal_connect (G_OBJECT (loa->webview),
             "destroy", G_CALLBACK (loa_destroyCb), NULL); 
 

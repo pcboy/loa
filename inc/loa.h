@@ -15,6 +15,8 @@ typedef enum mode_s {
 typedef struct loa_s {
     void (*init)(void);
     /**/
+    int argc;
+    char **argv;
     int modal;
     bool shortcuts; /* true when shortcuts appears */
     mode_t mode;

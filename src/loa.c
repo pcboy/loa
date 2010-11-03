@@ -228,6 +228,24 @@ pid_t loa_openNewWin(loa_t *slf, const char *uri)
     return pid;
 }
 
+gboolean loa_newWinPolicyDecisionReqCb(WebKitWebView *webview,
+        WebKitWebFrame *frame, WebKitNetworkRequest *req,
+        WebKitWebNavigationAction *navaction,
+        WebKitWebPolicyDecision *policy, gpointer data)
+{
+    loa_t *slf = (loa_t*)data;
+    int button;
+
+    (void)webview, (void)frame, (void)policy;
+    button = webkit_web_navigation_action_get_button(navaction);
+    if (button == 1 || button == 2) {
+        loa_openNewWin(slf, webkit_network_request_get_uri(req));
+        return true;
+    }
+    /* Do nothing if I didn't click on it. */
+    return true;
+}
+
 gboolean loa_navPolicyDecisionReqCb(WebKitWebView *webview,
         WebKitWebFrame *frame, WebKitNetworkRequest *req,
         WebKitWebNavigationAction *navaction,
@@ -337,6 +355,9 @@ loa_t *loa_init(int argc, char **argv)
     g_signal_connect(G_OBJECT(loa->webview),
             "navigation-policy-decision-requested",
             G_CALLBACK(loa_navPolicyDecisionReqCb), loa);
+    g_signal_connect(G_OBJECT(loa->webview),
+            "new-window-policy-decision-requested",
+            G_CALLBACK(loa_newWinPolicyDecisionReqCb), loa);
     g_signal_connect (G_OBJECT (loa->webview),
             "destroy", G_CALLBACK (loa_destroyCb), NULL); 
 

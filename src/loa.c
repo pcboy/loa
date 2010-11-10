@@ -19,6 +19,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <sys/wait.h>
 
 #include <gdk/gdkkeysyms.h>
 
@@ -327,16 +328,40 @@ static gint loa_keyPressCb(GtkWidget *widget,
     return 0;
 }
 
-static void loa_destroyCb (GtkWidget* widget, gpointer data)
+static void loa_destroyCb(GtkWidget* widget, gpointer data)
 {
     (void)widget;
     (void)data;
-    gtk_main_quit ();
+    gtk_main_quit();
+}
+
+bool loa_setProxy(const char *uri)
+{
+    SoupURI *soupuri = NULL;
+    SoupSession *sess = webkit_get_default_session();
+
+    if (!uri)
+        return false;
+
+    if ((soupuri = soup_uri_new(uri))) {
+        g_object_set(sess, "proxy-uri", soupuri, NULL);
+        soup_uri_free(soupuri);
+        return true;
+    }
+    return false;
+}
+
+void loa_sigchld(int signum)
+{
+    (void)signum;
+    if (wait(0) < 0)
+        perror("wait");
 }
 
 loa_t *loa_init(int argc, char **argv)
 {
     loa_t *loa = calloc(1, sizeof(loa_t));
+    struct sigaction sig;
 
     loa->argc = argc;
     loa->argv = argv;
@@ -346,6 +371,10 @@ loa_t *loa_init(int argc, char **argv)
     loa_putWebkit(loa);
     loa_putStatusBar(loa);
 
+    memset(&sig, '\0', sizeof(struct sigaction));
+    sig.sa_handler = loa_sigchld;
+    if (sigaction(SIGCHLD, &sig, NULL) < 0)
+        perror("sigaction");
     g_signal_connect(G_OBJECT(loa->webview),
             "key_press_event", G_CALLBACK(loa_keyPressCb), loa);
     g_signal_connect(G_OBJECT(loa->webview),
@@ -362,6 +391,8 @@ loa_t *loa_init(int argc, char **argv)
             "destroy", G_CALLBACK (loa_destroyCb), NULL); 
 
     gtk_widget_show_all(GTK_WIDGET(loa->mainwin));
+    if (!loa_setProxy(getenv("LOA_PROXY")))
+        loa_setProxy(getenv("http_proxy"));
     loa_goUri(loa, argc > 1 ? argv[1] : "http://google.com");
     return loa;
 }

@@ -229,7 +229,7 @@ pid_t loa_openNewWin(loa_t *slf, const char *uri)
     return pid;
 }
 
-gboolean loa_newWinPolicyDecisionReqCb(WebKitWebView *webview,
+static gboolean loa_newWinPolicyDecisionReqCb(WebKitWebView *webview,
         WebKitWebFrame *frame, WebKitNetworkRequest *req,
         WebKitWebNavigationAction *navaction,
         WebKitWebPolicyDecision *policy, gpointer data)
@@ -247,7 +247,7 @@ gboolean loa_newWinPolicyDecisionReqCb(WebKitWebView *webview,
     return true;
 }
 
-gboolean loa_navPolicyDecisionReqCb(WebKitWebView *webview,
+static gboolean loa_navPolicyDecisionReqCb(WebKitWebView *webview,
         WebKitWebFrame *frame, WebKitNetworkRequest *req,
         WebKitWebNavigationAction *navaction,
         WebKitWebPolicyDecision *policy, gpointer data)
@@ -335,7 +335,7 @@ static void loa_destroyCb(GtkWidget* widget, gpointer data)
     gtk_main_quit();
 }
 
-bool loa_setProxy(const char *uri)
+static bool loa_setProxy(const char *uri)
 {
     SoupURI *soupuri = NULL;
     SoupSession *sess = webkit_get_default_session();
@@ -351,7 +351,7 @@ bool loa_setProxy(const char *uri)
     return false;
 }
 
-void loa_sigchld(int signum)
+static void loa_sigchld(int signum)
 {
     (void)signum;
     if (wait(0) < 0)

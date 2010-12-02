@@ -9,7 +9,8 @@ typedef enum mode_s {
     ENTRY_MODE,
     INSERT_MODE,
     URL_MODE,
-    OPEN_MODE
+    OPEN_MODE,
+    SEARCH_MODE,
 } mode_t;
 
 typedef struct loa_s {

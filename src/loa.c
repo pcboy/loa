@@ -18,6 +18,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <ctype.h>
 #include <unistd.h>
 #include <sys/wait.h>
 
@@ -80,6 +81,9 @@ static inline void loa_switchMode(loa_t *slf, mode_t m)
         case OPEN_MODE:
             gtk_label_set_text(slf->stbarlbl, "Open");
             break;
+        case SEARCH_MODE:
+            gtk_label_set_text(slf->stbarlbl, "Search");
+            break;
         default:
             abort();
             break;
@@ -109,7 +113,7 @@ static void loa_putWebkit(loa_t *slf)
 
 static gint loa_goUri(loa_t *slf, const gchar *txt)
 {
-    if (strlen(txt)) {
+    if (txt && strlen(txt)) {
         webkit_web_view_load_uri(slf->webview, txt);
         gtk_entry_set_text(slf->stbaruri, txt);
     }
@@ -133,6 +137,21 @@ static gint loa_stbarActivateCb(GtkEntry *entry, gpointer data)
                 snprintf(tagsearch, sizeof(tagsearch), clickUrl, txt);
                 webkit_web_view_execute_script(slf->webview, tagsearch);
                 break;
+            }
+        case SEARCH_MODE:
+            {
+                char tosearch[2048];
+                int i;
+                bool sensitive = false;
+
+                snprintf(tosearch, sizeof(tosearch), "%s", txt);
+                for (i = 0; tosearch[i]; ++i)
+                    if (isupper(tosearch[i]))
+                        sensitive = true;
+                if (!webkit_web_view_search_text(slf->webview, tosearch,
+                        sensitive, true, true)) {
+                    fprintf(stderr, "Search term not found\n");
+                }
             }
         default:
             break;
@@ -162,16 +181,25 @@ static void loa_putStatusBar(loa_t *slf)
             GTK_WIDGET(box), false, true, 0);
 }
 
-static void loa_handleEntry(loa_t *slf)
+static void loa_getFocusOnBarEntry(loa_t *slf)
 {
     slf->modal = true;
     gtk_widget_grab_focus(GTK_WIDGET(slf->stbarentry));
 }
 
+static void loa_handleSearch(loa_t *slf)
+{
+    loa_getFocusOnBarEntry(slf);
+}
+
+static void loa_handleEntry(loa_t *slf)
+{
+    loa_getFocusOnBarEntry(slf);
+}
+
 static void loa_handleUrl(loa_t *slf)
 {
-    slf->modal = true;
-    gtk_widget_grab_focus(GTK_WIDGET(slf->stbarentry));
+    loa_getFocusOnBarEntry(slf);
     if (!slf->shortcuts) {
         webkit_web_view_execute_script(slf->webview, code);
         slf->shortcuts = true;
@@ -180,8 +208,7 @@ static void loa_handleUrl(loa_t *slf)
 
 static void loa_handleOpen(loa_t *slf)
 {
-    slf->modal = true;
-    gtk_widget_grab_focus(GTK_WIDGET(slf->stbarentry));
+    loa_getFocusOnBarEntry(slf);
 }
 
 static void loa_handleStop(loa_t *slf)
@@ -306,6 +333,11 @@ static gint loa_keyPressCb(GtkWidget *widget,
                     break;
                 case 'n': /* Next in colemak */
                     webkit_web_view_go_forward(slf->webview);
+                    break;
+                case 'd': /* Search in colemak */
+                    g_message("Switch to search");
+                    loa_switchMode(slf, SEARCH_MODE);
+                    loa_handleSearch(slf);
                     break;
                 case GDK_Left...GDK_Down: /* arrows */
                     return 0;

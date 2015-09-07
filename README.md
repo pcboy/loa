@@ -2,10 +2,6 @@
 
 Loa is a webkit based browser mostly (if not fully) keyboard controlled. The idea is reducing features (to keep it fast and bugless), and maximizing the home row use for faster browsing. For now, it's optimized for a Colemak keymap (but of course it will be configurable soon).
 
-## Be warned: Loa is still in active development.
-
-If you want to try it, without compiling it, you can download it [here](http://www.pcboy.su/loa)
-
 ### How does it work ?
 
 Main keys:
